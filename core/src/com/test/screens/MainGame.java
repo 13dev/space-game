@@ -8,6 +8,7 @@ import com.badlogic.gdx.Input.Keys;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.math.Rectangle;
 import com.test.game.MyTest;
 
 import entities.Asteroid;
@@ -21,13 +22,14 @@ public class MainGame implements Screen {
 	public static final float SHIP_OFFSET = 8f;
 	public static final float ROLL_TIMER = 1f;
 	public static final float SHOOT_WAIT_TIME = 0.3f;
-	public static final float ASTEROID_SPAWN_INTERVAL = 3f;
+	public static final float ASTEROID_SPAWN_INTERVAL = 0.5f;
 	
 	public MyTest game;
 	public ArrayList<Texture> rolls;
 	
 	public int shipState;
-	public float shipX, shipY, rollTimer, shootTimer, asteroidTimer;
+	public static float shipX, shipY;
+	public float rollTimer, shootTimer, asteroidTimer;
 	
 	//bullets
 	public ArrayList<Bullet> bullets;
@@ -113,6 +115,8 @@ public class MainGame implements Screen {
 			randomX = getRandomFloat(0, Gdx.graphics.getWidth() - Asteroid.WIDTH);
 		}
 		
+		//Collisions
+		this.checkCollisions();
 		
 		// Update bullets
 		this.updateBullets(delta);
@@ -127,6 +131,7 @@ public class MainGame implements Screen {
 			shipState = 0;
 			
 		}
+	
 		
 		game.batch.begin();
 		game.batch.draw(rolls.get(shipState), shipX, shipY, SHIP_WIDTH, SHIP_HEIGHT);
@@ -188,7 +193,7 @@ public class MainGame implements Screen {
 			bullet.update(delta);
 			if (bullet.remove){
 				bulletsToRemove.add(bullet);
-				System.out.println("Bullet removida BulletsToRemove Size: " + bulletsToRemove.size());
+				System.out.println("Bullet removida. BulletsToRemove Size: " + bulletsToRemove.size());
 			}
 		}
 		
@@ -215,8 +220,35 @@ public class MainGame implements Screen {
 	
 	public static float getRandomFloat (float min, float max){
 		float v = min + (new Random()).nextFloat() * (max - min);
-		System.out.println("" + v);
+		//System.out.println("" + v);
 		return v;
+	}
+	
+	public boolean isColliding (Rectangle obj1, Rectangle obj2){
+		return (obj1.overlaps(obj2));
+		
+	}
+	
+	public void checkCollisions(){
+		//Asteroid : bullet
+		for(Asteroid asteroid : asteroids){
+			for(Bullet bullet : bullets){
+				if(isColliding(asteroid.getCollisionBox(), bullet.getCollisionBox())){
+					System.out.println("Colision!!");
+					//Add in list to remove
+					asteroidsToRemove.add(asteroid);
+					bulletsToRemove.add(bullet);
+				}
+			}
+		}
+	}
+
+	public static float getShipX() {
+		return shipX;
+	}
+
+	public static float getShipY() {
+		return shipY;
 	}
 
 }
